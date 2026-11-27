@@ -2,6 +2,7 @@ import './App.css'
 import CustomerList from './components/CustomerList'
 import TrainingList from './components/TrainingList'
 import TrainingCalendar from './components/TrainingCalendar'
+import TrainingStatistics from './components/TrainingStatistics'
 
 function App() {
     return (
@@ -13,6 +14,8 @@ function App() {
             <TrainingList />
             {/* Shows all scheduled trainings in month, week, and day views. */}
             <TrainingCalendar />
+            {/* Shows total training minutes grouped by activity. */}
+            <TrainingStatistics />
         </main>
     )
 }
