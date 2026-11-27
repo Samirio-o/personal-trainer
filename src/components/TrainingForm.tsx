@@ -3,35 +3,40 @@ import type { FormEvent } from 'react'
 import type { Customer } from '../types/customer'
 import type { TrainingInput } from '../types/training'
 
+import type { Dayjs } from 'dayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
 type TrainingFormProps = {
     customers: Customer[],
     onSave: (training: TrainingInput) => Promise<void>,
     onCancel: () => void,
 }
 
-// Converts the selected local date and time to the ISO format used by the API.
-function toIsoDate(localDateTime: string): string {
-    return new Date(localDateTime).toISOString()
-}
-
 function TrainingForm({ customers, onSave, onCancel }: TrainingFormProps) {
     // Collects the selected date, activity, duration, and customer API link.
-    const [date, setDate] = useState('')
     const [activity, setActivity] = useState('')
     const [duration, setDuration] = useState('')
     const [customerUrl, setCustomerUrl] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [isSaving, setIsSaving] = useState(false)
+    // Keeps the selected date for the MUI date-time picker.
+    const [date, setDate] = useState<Dayjs | null>(null)
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
+        if (!date || !date.isValid()) {
+            setError('Please select a valid training date and time.')
+            return
+        }
         setError(null)
         setIsSaving(true)
 
         try {
             // The API expects duration as a number and customer as a resource URL.
             await onSave({
-                date: toIsoDate(date),
+                date: date.toISOString(),
                 activity,
                 duration: Number(duration),
                 customer: customerUrl,
@@ -50,15 +55,15 @@ function TrainingForm({ customers, onSave, onCancel }: TrainingFormProps) {
         <form onSubmit={handleSubmit}>
             <h2>Add training</h2>
 
-            <label>
-                Date and time
-                <input
-                    type="datetime-local"
-                    required
+            {/* MUI picker lets the user choose the training date and time. */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DateTimePicker
+                    label="Date and time"
                     value={date}
-                    onChange={event => setDate(event.target.value)}
+                    onChange={newDate => setDate(newDate)}
+                    slotProps={{ textField: { required: true } }}
                 />
-            </label>
+            </LocalizationProvider>
 
             <label>
                 Activity

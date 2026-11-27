@@ -1,6 +1,7 @@
+import './App.css'
 import CustomerList from './components/CustomerList'
 import TrainingList from './components/TrainingList'
-import './App.css'
+import TrainingCalendar from './components/TrainingCalendar'
 
 function App() {
     return (
@@ -10,6 +11,8 @@ function App() {
             {/* The app keeps customer and training management on one page. */}
             <CustomerList />
             <TrainingList />
+            {/* Shows all scheduled trainings in month, week, and day views. */}
+            <TrainingCalendar />
         </main>
     )
 }
