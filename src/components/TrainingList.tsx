@@ -8,6 +8,8 @@ import {
     getTrainings,
 } from '../services/trainingService'
 
+// Load the date-picker form only when the user opens it.
+const TrainingForm = lazy(() => import('./TrainingForm'))
 
 function TrainingList() {
     // Stores the data needed by the table and the customer selector.
@@ -16,8 +18,6 @@ function TrainingList() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
-    // Load the date-picker form only when the user opens it.
-    const TrainingForm = lazy(() => import('./TrainingForm'))
 
     // Loads both datasets together so the list and form stay in sync.
     const loadData = useCallback(async () => {
