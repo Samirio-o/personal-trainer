@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import type { Customer } from '../types/customer'
 import type { Training, TrainingInput } from '../types/training'
 import { getCustomers } from '../services/customerService'
@@ -7,7 +7,7 @@ import {
     deleteTraining,
     getTrainings,
 } from '../services/trainingService'
-import TrainingForm from './TrainingForm'
+
 
 function TrainingList() {
     // Stores the data needed by the table and the customer selector.
@@ -16,6 +16,8 @@ function TrainingList() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
+    // Load the date-picker form only when the user opens it.
+    const TrainingForm = lazy(() => import('./TrainingForm'))
 
     // Loads both datasets together so the list and form stay in sync.
     const loadData = useCallback(async () => {
@@ -90,11 +92,13 @@ function TrainingList() {
             )}
 
             {isFormOpen && (
-                <TrainingForm
-                    customers={customers}
-                    onSave={handleSave}
-                    onCancel={() => setIsFormOpen(false)}
-                />
+                <Suspense fallback={<p>Loading training form...</p>}>
+                    <TrainingForm
+                        customers={customers}
+                        onSave={handleSave}
+                        onCancel={() => setIsFormOpen(false)}
+                    />
+                </Suspense>
             )}
 
             {error && <p role="alert">{error}</p>}

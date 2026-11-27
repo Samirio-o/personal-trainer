@@ -1,21 +1,26 @@
+import { lazy, Suspense } from 'react'
 import './App.css'
 import CustomerList from './components/CustomerList'
 import TrainingList from './components/TrainingList'
-import TrainingCalendar from './components/TrainingCalendar'
-import TrainingStatistics from './components/TrainingStatistics'
+
+// Load the larger calendar and chart only when the app needs them.
+const TrainingCalendar = lazy(() => import('./components/TrainingCalendar'))
+const TrainingStatistics = lazy(() => import('./components/TrainingStatistics'))
 
 function App() {
     return (
         <main>
             <h1>Personal Trainer</h1>
 
-            {/* The app keeps customer and training management on one page. */}
+            {/* Customer and training lists stay available on the main page. */}
             <CustomerList />
             <TrainingList />
-            {/* Shows all scheduled trainings in month, week, and day views. */}
-            <TrainingCalendar />
-            {/* Shows total training minutes grouped by activity. */}
-            <TrainingStatistics />
+
+            {/* React displays this message while loading the larger components. */}
+            <Suspense fallback={<p>Loading calendar and statistics...</p>}>
+                <TrainingCalendar />
+                <TrainingStatistics />
+            </Suspense>
         </main>
     )
 }

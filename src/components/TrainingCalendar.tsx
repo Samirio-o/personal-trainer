@@ -3,7 +3,10 @@ import FullCalendar from '@fullcalendar/react'
 import type { EventInput } from '@fullcalendar/core'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { Alert, CircularProgress, Paper, Typography } from '@mui/material'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
 import { getTrainings } from '../services/trainingService'
 
 // Loads all trainings once and turns each one into a calendar event.

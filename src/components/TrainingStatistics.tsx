@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import { groupBy, sumBy } from 'lodash'
-import {
-    Alert,
-    CircularProgress,
-    Paper,
-    Typography,
-} from '@mui/material'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
 import {
     Bar,
     BarChart,
