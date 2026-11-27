@@ -6,6 +6,7 @@ import {
     getCustomers,
     updateCustomer,
 } from '../services/customerService'
+import { exportCustomersToCsv } from '../utils/exportCustomers'
 import CustomerForm from './CustomerForm'
 
 function CustomerList() {
@@ -94,6 +95,15 @@ function CustomerList() {
                 <h2>Customers</h2>
                 <button type="button" onClick={openAddForm}>
                     Add customer
+                </button>
+
+                {/* Exports only customer details, not the table's action buttons. */}
+                <button
+                    type="button"
+                    onClick={() => exportCustomersToCsv(customers)}
+                    disabled={customers.length === 0}
+                >
+                    Export CSV
                 </button>
             </div>
 
