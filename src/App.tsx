@@ -1,12 +1,14 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import './App.css'
-import CustomerList from './components/CustomerList'
-import TrainingList from './components/TrainingList'
 
+const CustomerList = lazy(() => import('./components/CustomerList'))
+const TrainingList = lazy(() => import('./components/TrainingList'))
 const TrainingCalendar = lazy(() => import('./components/TrainingCalendar'))
 const TrainingStatistics = lazy(() => import('./components/TrainingStatistics'))
 
 function App() {
+    const [trainingVersion, setTrainingVersion] = useState(0)
+
     return (
         <main className="app-shell" id="top">
             {/* Brand and anchor links make the main sections easy to reach. */}
@@ -42,22 +44,26 @@ function App() {
 
                 {/* Each section has an anchor target for the navigation above. */}
                 <section id="customers" className="dashboard-card">
-                    <CustomerList />
+                    <Suspense fallback={<p>Loading customers...</p>}>
+                        <CustomerList />
+                    </Suspense>
                 </section>
 
                 <section id="trainings" className="dashboard-card">
-                    <TrainingList />
+                    <Suspense fallback={<p>Loading trainings...</p>}>
+                        <TrainingList onTrainingsChanged={() => setTrainingVersion(v => v + 1)} />
+                    </Suspense>
                 </section>
 
                 <section id="calendar" className="dashboard-card">
                     <Suspense fallback={<p>Loading calendar...</p>}>
-                        <TrainingCalendar />
+                        <TrainingCalendar refreshKey={trainingVersion} />
                     </Suspense>
                 </section>
 
                 <section id="statistics" className="dashboard-card">
                     <Suspense fallback={<p>Loading statistics...</p>}>
-                        <TrainingStatistics />
+                        <TrainingStatistics refreshKey={trainingVersion} />
                     </Suspense>
                 </section>
             </div>

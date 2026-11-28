@@ -10,7 +10,11 @@ import Typography from '@mui/material/Typography'
 import { getTrainings } from '../services/trainingService'
 
 // Loads all trainings once and turns each one into a calendar event.
-function TrainingCalendar() {
+type TrainingCalendarProps = {
+    refreshKey?: number,
+}
+
+function TrainingCalendar({ refreshKey }: TrainingCalendarProps) {
     const [events, setEvents] = useState<EventInput[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -33,7 +37,7 @@ function TrainingCalendar() {
                 setError(message)
             })
             .finally(() => setIsLoading(false))
-    }, [])
+    }, [refreshKey])
 
     return (
         <Paper component="section" elevation={2} sx={{ p: 3, mt: 4 }}>

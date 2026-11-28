@@ -16,7 +16,11 @@ import {
 import type { Training } from '../types/training'
 import { getTrainings } from '../services/trainingService'
 
-function TrainingStatistics() {
+type TrainingStatisticsProps = {
+    refreshKey?: number,
+}
+
+function TrainingStatistics({ refreshKey }: TrainingStatisticsProps) {
     const [trainings, setTrainings] = useState<Training[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -32,7 +36,7 @@ function TrainingStatistics() {
                 setError(message)
             })
             .finally(() => setIsLoading(false))
-    }, [])
+    }, [refreshKey])
 
     // Groups sessions by activity and adds their durations in minutes.
     const minutesByActivity = Object.entries(

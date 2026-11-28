@@ -8,6 +8,10 @@ import {
 } from '../services/customerService'
 import { exportCustomersToCsv } from '../utils/exportCustomers'
 import CustomerForm from './CustomerForm'
+import ConfirmDialog from './ConfirmDialog'
+import { DataGrid } from '@mui/x-data-grid'
+import type { GridColDef } from '@mui/x-data-grid'
+
 
 function CustomerList() {
     // These states track the list, loading/errors, and which form is open.
@@ -16,6 +20,8 @@ function CustomerList() {
     const [error, setError] = useState<string | null>(null)
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null)
 
     // Fetches the latest list after the page opens or a customer changes.
     const loadCustomers = useCallback(async () => {
@@ -40,6 +46,20 @@ function CustomerList() {
         void loadCustomers()
     }, [loadCustomers])
 
+    // Filters customers across their contact and address details.
+    const search = searchTerm.trim().toLocaleLowerCase()
+    const filteredCustomers = customers.filter(customer =>
+        [
+            customer.firstname,
+            customer.lastname,
+            customer.email,
+            customer.phone,
+            customer.streetaddress,
+            customer.postcode,
+            customer.city,
+        ].some(value => value.toLocaleLowerCase().includes(search)),
+    )
+
     // Chooses create or update based on whether a customer is being edited.
     async function handleSave(data: CustomerInput) {
         if (editingCustomer) {
@@ -53,24 +73,28 @@ function CustomerList() {
         await loadCustomers()
     }
 
-    // Confirms the destructive action before calling the API.
-    async function handleDelete(customer: Customer) {
-        const name = `${customer.firstname} ${customer.lastname}`
-        const confirmed = window.confirm(`Delete ${name} and their trainings?`)
+    // Opens the confirm dialog for the selected customer.
+    function requestDelete(customer: Customer) {
+        setCustomerToDelete(customer)
+    }
 
-        if (!confirmed) {
+    // Runs after the user confirms deletion in the dialog.
+    async function confirmDelete() {
+        if (!customerToDelete) {
             return
         }
 
         try {
             setError(null)
-            await deleteCustomer(customer._links.self.href)
+            await deleteCustomer(customerToDelete._links.self.href)
             await loadCustomers()
         } catch (reason: unknown) {
             const message = reason instanceof Error
                 ? reason.message
                 : 'An unexpected error occurred'
             setError(message)
+        } finally {
+            setCustomerToDelete(null)
         }
     }
 
@@ -88,6 +112,35 @@ function CustomerList() {
         setIsFormOpen(false)
         setEditingCustomer(null)
     }
+
+    // DataGrid provides sorting when the user clicks a sortable column heading.
+    const columns: GridColDef<Customer>[] = [
+        { field: 'firstname', headerName: 'First name', flex: 1, minWidth: 120 },
+        { field: 'lastname', headerName: 'Last name', flex: 1, minWidth: 120 },
+        { field: 'email', headerName: 'Email', flex: 1, minWidth: 180 },
+        { field: 'phone', headerName: 'Phone', width: 150 },
+        { field: 'city', headerName: 'City', flex: 1, minWidth: 130 },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 160,
+            sortable: false,
+            filterable: false,
+            renderCell: params => (
+                <>
+                    <button type="button" onClick={() => openEditForm(params.row)}>
+                        Edit
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => requestDelete(params.row)}
+                    >
+                        Delete
+                    </button>
+                </>
+            ),
+        },
+    ]
 
     return (
         <section>
@@ -117,47 +170,36 @@ function CustomerList() {
 
             {error && <p role="alert">{error}</p>}
 
-            {isLoading ? (
-                <p>Loading customers...</p>
-            ) : customers.length === 0 ? (
-                <p>No customers found. You can add the first customer.</p>
-            ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Phone</th>
-                            <th scope="col">City</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {customers.map(customer => (
-                            <tr key={customer._links.self.href}>
-                                <td>{customer.firstname} {customer.lastname}</td>
-                                <td>{customer.email}</td>
-                                <td>{customer.phone}</td>
-                                <td>{customer.city}</td>
-                                <td>
-                                    <button
-                                        type="button"
-                                        onClick={() => openEditForm(customer)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => void handleDelete(customer)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+            <label>
+                Search customers
+                <input
+                    type="search"
+                    value={searchTerm}
+                    onChange={event => setSearchTerm(event.target.value)}
+                    placeholder="Name, email, phone, city..."
+                />
+            </label>
+
+            <div style={{ height: 520, width: '100%' }}>
+                <DataGrid
+                    rows={filteredCustomers}
+                    columns={columns}
+                    getRowId={customer => customer._links.self.href}
+                    loading={isLoading}
+                    autoPageSize
+                    disableRowSelectionOnClick
+                />
+            </div>
+
+            <ConfirmDialog
+                open={customerToDelete !== null}
+                title="Delete customer"
+                message={customerToDelete
+                    ? `Delete ${customerToDelete.firstname} ${customerToDelete.lastname} and their trainings?`
+                    : ''}
+                onConfirm={() => void confirmDelete()}
+                onCancel={() => setCustomerToDelete(null)}
+            />
         </section>
     )
 }
