@@ -14,6 +14,8 @@ type TrainingCalendarProps = {
     refreshKey?: number,
 }
 
+// Loads all trainings and turns each one into a calendar event. Re-runs when
+// refreshKey changes, so the calendar updates after adding or deleting a training.
 function TrainingCalendar({ refreshKey }: TrainingCalendarProps) {
     const [events, setEvents] = useState<EventInput[]>([])
     const [isLoading, setIsLoading] = useState(true)

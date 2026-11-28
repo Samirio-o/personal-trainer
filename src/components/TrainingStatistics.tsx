@@ -25,7 +25,8 @@ function TrainingStatistics({ refreshKey }: TrainingStatisticsProps) {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // Loads sessions once so the chart reflects the data returned by the API.
+    // Loads sessions and reloads them whenever refreshKey changes, so the chart
+    // stays in sync after a training is added or removed elsewhere in the app.
     useEffect(() => {
         getTrainings()
             .then(setTrainings)

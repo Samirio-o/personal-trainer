@@ -7,6 +7,8 @@ const TrainingCalendar = lazy(() => import('./components/TrainingCalendar'))
 const TrainingStatistics = lazy(() => import('./components/TrainingStatistics'))
 
 function App() {
+    // Incremented whenever a training is added or deleted, so the calendar and
+    // statistics sections reload fresh data without needing a page refresh.
     const [trainingVersion, setTrainingVersion] = useState(0)
 
     return (
